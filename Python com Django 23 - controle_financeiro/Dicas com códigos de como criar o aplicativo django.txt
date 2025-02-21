@@ -1,0 +1,19 @@
+Criar um novo projeto Django
+django-admin startproject controle_financeiro
+
+Criar um novo aplicativo Django
+cd controle_financeiro
+python manage.py startapp financeiro
+
+Criar e aplicar as migrações do banco de dados
+python manage.py makemigrations
+python manage.py migrate
+
+Criar um superusuário para acessar o admin
+python manage.py createsuperuser
+
+Executar o servidor de desenvolvimento
+python manage.py runserver
+
+Ao conectar o servidor, acesse:
+http:127.0.0.1:8000
