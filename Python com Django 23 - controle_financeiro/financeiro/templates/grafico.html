@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gerar Gráficos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Estilo para ajustar o tamanho dos gráficos */
+        canvas {
+            max-width: 300px;
+            max-height: 300px;
+            margin: 20px auto;
+            display: block;
+        }
+    </style>
+</head>
+<body class="container mt-5">
+    <h1 class="mb-4">Gráficos Financeiros</h1>
+
+    <div class="d-flex gap-2 mb-4">
+        <a href="{% url 'index' %}" class="btn btn-primary">Voltar</a>
+    </div>
+
+    <h3>Total de Receitas e Despesas</h3>
+    <canvas id="graficoTotal"></canvas>
+
+    <h3>Receitas e Despesas no Mês (MM/YYYY)</h3>
+    <form method="get">
+        <input type="text" name="mes" placeholder="Mês (MM)" required>
+        <input type="text" name="ano" placeholder="Ano (YYYY)" required>
+        <button type="submit" class="btn btn-info">Gerar Gráfico do Mês</button>
+    </form>
+    <canvas id="graficoMes"></canvas>
+
+    <h3>Receitas e Despesas no Ano (YYYY)</h3>
+    <form method="get">
+        <input type="text" name="ano" placeholder="Ano (YYYY)" required>
+        <button type="submit" class="btn btn-info">Gerar Gráfico do Ano</button>
+    </form>
+    <canvas id="graficoAno"></canvas>
+
+    <script>
+        // Função para formatar valores como R$
+        function formatarValor(valor) {
+            return 'R$ ' + valor.toFixed(2).replace('.', ',');
+        }
+
+        // Função para formatar porcentagens
+        function formatarPorcentagem(valor, total) {
+            return (valor / total * 100).toFixed(2) + '%';
+        }
+
+        // Gráfico Total
+        var ctxTotal = document.getElementById('graficoTotal').getContext('2d');
+        var graficoTotal = new Chart(ctxTotal, {
+            type: 'pie',
+            data: {
+                labels: ['Receitas', 'Despesas'],
+                datasets: [{
+                    label: 'Total',
+                    data: [{{ receita_total }}, {{ despesa_total }}],
+                    backgroundColor: ['#4CAF50', '#F44336'],
+                    borderColor: ['#4CAF50', '#F44336'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                var valor = tooltipItem.raw;
+                                var total = {{ receita_total }} + {{ despesa_total }};
+                                return tooltipItem.label + ': ' + formatarValor(valor) + ' (' + formatarPorcentagem(valor, total) + ')';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico Mês
+        var ctxMes = document.getElementById('graficoMes').getContext('2d');
+        var graficoMes = new Chart(ctxMes, {
+            type: 'pie',
+            data: {
+                labels: ['Receitas', 'Despesas'],
+                datasets: [{
+                    label: 'Mês',
+                    data: [{{ receita_mes_total }}, {{ despesa_mes_total }}],
+                    backgroundColor: ['#4CAF50', '#F44336'],
+                    borderColor: ['#4CAF50', '#F44336'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                var valor = tooltipItem.raw;
+                                var total = {{ receita_mes_total }} + {{ despesa_mes_total }};
+                                return tooltipItem.label + ': ' + formatarValor(valor) + ' (' + formatarPorcentagem(valor, total) + ')';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico Ano
+        var ctxAno = document.getElementById('graficoAno').getContext('2d');
+        var graficoAno = new Chart(ctxAno, {
+            type: 'pie',
+            data: {
+                labels: ['Receitas', 'Despesas'],
+                datasets: [{
+                    label: 'Ano',
+                    data: [{{ receita_ano_total }}, {{ despesa_ano_total }}],
+                    backgroundColor: ['#4CAF50', '#F44336'],
+                    borderColor: ['#4CAF50', '#F44336'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                var valor = tooltipItem.raw;
+                                var total = {{ receita_ano_total }} + {{ despesa_ano_total }};
+                                return tooltipItem.label + ': ' + formatarValor(valor) + ' (' + formatarPorcentagem(valor, total) + ')';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
