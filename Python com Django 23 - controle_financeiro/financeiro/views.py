@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from django.http import JsonResponse
 
 # Exibir a página principal com receitas e despesas
 def index(request):
@@ -77,25 +78,46 @@ def excluir_despesa(request, despesa_id):
 
 # Gerar gráfico de pizza
 def gerar_grafico(request):
+    # Receitas e despesas totais
     receitas = Receita.objects.all()
     despesas = Despesa.objects.all()
-    
+
     receita_total = sum([r.valor for r in receitas])
     despesa_total = sum([d.valor for d in despesas])
 
-    # Criar gráfico de pizza
-    labels = ['Receitas', 'Despesas']
-    sizes = [receita_total, despesa_total]
-    
-    fig, ax = plt.subplots()
-    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
-    ax.axis('equal')  # Torna o gráfico circular
+    # Para os gráficos mensais
+    mes = request.GET.get('mes', None)
+    ano = request.GET.get('ano', None)
 
-    # Salvar o gráfico em um arquivo de imagem em memória
-    buf = BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
-    return HttpResponse(buf, content_type='image/png')
+    if mes and ano:
+        receitas_mes = Receita.objects.filter(data__month=mes, data__year=ano)
+        despesas_mes = Despesa.objects.filter(data__month=mes, data__year=ano)
+    else:
+        receitas_mes = []
+        despesas_mes = []
+
+    receita_mes_total = sum([r.valor for r in receitas_mes])
+    despesa_mes_total = sum([d.valor for d in despesas_mes])
+
+    # Para os gráficos anuais
+    if ano:
+        receitas_ano = Receita.objects.filter(data__year=ano)
+        despesas_ano = Despesa.objects.filter(data__year=ano)
+    else:
+        receitas_ano = []
+        despesas_ano = []
+
+    receita_ano_total = sum([r.valor for r in receitas_ano])
+    despesa_ano_total = sum([d.valor for d in despesas_ano])
+
+    return render(request, 'grafico.html', {
+        'receita_total': receita_total,
+        'despesa_total': despesa_total,
+        'receita_mes_total': receita_mes_total,
+        'despesa_mes_total': despesa_mes_total,
+        'receita_ano_total': receita_ano_total,
+        'despesa_ano_total': despesa_ano_total,
+    })
 
 # Gerar relatório em PDF
 def gerar_pdf(request):
